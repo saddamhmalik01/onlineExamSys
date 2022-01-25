@@ -29,16 +29,16 @@
 <img src="Teacher screenshots/Screenshot (17).png"</img>
 <h1> Student Module </h1>
 <h2> Student Login </h2>
-<img src="Student screenshots/Screenshot (18).png"</img>
+<img src="student screenchots/Screenshot (18).png"</img>
 <h2>Student Dashboard </h2>
-<img src="Student screenshots/Screenshot (19).png"</img>
+<img src="student screenchots/Screenshot (19).png"</img>
 <h2> Exam </h2>
-<img src="Student screenshots/Screenshot (20).png"</img>
+<img src="student screenchots/Screenshot (20).png"</img>
 <h2> Dashboard after attempting exam </h2>
-<img src="Student screenshots/Screenshot (21).png"</img>
+<img src="student screenchots/Screenshot (21).png"</img>
 <h2> Results </h2>
-<img src="Student screenshots/Screenshot (22).png"</img>
+<img src="student screenchots/Screenshot (22).png"</img>
 <h2> Attempting exam again </h2>
-<img src="Student screenshots/Screenshot (23).png"</img>
+<img src="student screenchots/Screenshot (23).png"</img>
 
 
