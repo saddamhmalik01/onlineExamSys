@@ -123,7 +123,7 @@ class userController extends Controller
         ]);
         $cred = $creds;
         $cred['role']='teacher';
-        $cred['password']= 'password';
+        $cred['password']= bcrypt('password');
         $add = User::create($cred);
         if($add)
         {
