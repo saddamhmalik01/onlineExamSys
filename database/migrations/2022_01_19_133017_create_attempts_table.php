@@ -17,7 +17,7 @@ class CreateAttemptsTable extends Migration
             $table->id();
             $table->string('class');
             $table->string('rollno');
-            $table->string('attempts')->default('0');
+            $table->string('attempts');
 
             $table->timestamps();
         });
