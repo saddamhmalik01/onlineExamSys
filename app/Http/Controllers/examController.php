@@ -60,14 +60,14 @@ class examController extends Controller
              $attempted = $attempts->attempts;
             }
             if($attempted!=='0')
-                {
-                    return view('already');
-                }
+            {
+                return view('already');
+            }
             else
-                {
-                    return view('test',['test'=>$test,'class'=>$class]);
+            {
+                return view('test',['test'=>$test,'class'=>$class]);
 
-                }
+            }
         }
         else
         {
@@ -110,44 +110,8 @@ class examController extends Controller
         {   DB::table('attempts')->where('rollno',session('rollno'))->where('class',session('class'))->update(['attempts'=>1]);
             return redirect('studentdashboard');
         }
-    }
 
 
-    // ***********************************************************API****************************************
 
-public function createtest(Request $request)
-{
-    $no = $request['no'];
-    if($request['class']== '10th'){$class='tenth';}
-    if($request['class']=='12th'){$class='twelve';}
-    DB::table($class)->delete();
-    for($x=0;$x<$no;$x++)
-    {
-        $exam = DB::table($class)->insert([
-            'Question'=> $request['qns'.+$x],
-            'a'=> $request['a'.+$x],
-            'b'=> $request['b'.+$x],
-            'c'=> $request['c'.+$x],
-            'd'=> $request['d'.+$x],
-            'ans'=> $request['ans'.+$x],
-        ]);
     }
-    DB::table('attempts')->where('class',$request['class'])->update(['attempts'=>'0']);
-    if($exam)
-    {
-        return response()->json(['message'=>'Test added successful']);
-    }
-    else
-    {
-        return response()->json(['message'=>'Error occured while saving test']);
-    }
-
 }
-
-
-
-
-
-} //end of file
-
-
