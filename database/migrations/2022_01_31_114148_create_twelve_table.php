@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAttemptsTable extends Migration
+class CreateTwelveTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,14 @@ class CreateAttemptsTable extends Migration
      */
     public function up()
     {
-        Schema::create('attempts', function (Blueprint $table) {
+        Schema::create('twelve', function (Blueprint $table) {
             $table->id();
-            $table->string('class');
-            $table->string('rollno');
-            $table->string('attempts')->default('0');
-
+            $table->string('Question');
+            $table->string('a');
+            $table->string('b');
+            $table->string('c');
+            $table->string('d');
+            $table->string('ans');
             $table->timestamps();
         });
     }
@@ -30,6 +32,6 @@ class CreateAttemptsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('attempts');
+        Schema::dropIfExists('twelve');
     }
 }
