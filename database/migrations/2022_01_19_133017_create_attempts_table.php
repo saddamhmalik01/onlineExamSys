@@ -15,8 +15,7 @@ class CreateAttemptsTable extends Migration
     {
         Schema::create('attempts', function (Blueprint $table) {
             $table->id();
-            $table->string('class');
-            $table->string('rollno');
+            $table->string('student_id')->foreign('user_id')->references('id')->on('students');
             $table->string('attempts')->default('0');
 
             $table->timestamps();

@@ -8,6 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class tenth extends Model
 {
     use HasFactory;
-    public $tablename = 'tenth';
+    public $tablename='10th';
     public $fillable = ['Question','a','b','c','d','ans'];
 }

@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Illuminate\Support\Facades\Hash;
+use App\Models\student;
 
 class userController extends Controller
 {
@@ -21,40 +22,34 @@ class userController extends Controller
         if(Auth::attempt($cred))
         {
 
-
-            $role = Auth::user()->role;
-            if($role =='admin')
+            if(Auth::user()->role =='admin')
             {
                 $request->session()->put('admin',$cred['email']);
                 return redirect('admin/dashboard');
             }
-            elseif($role == 'teacher')
+            elseif(Auth::user()->role == 'teacher')
             {
                 $request->session()->put('teacher',$cred['email']);
                 return redirect('teacher/dashboard');
             }
-
         }
-        else
-        {
-            return redirect('/');
+        return redirect('/');
 
-        }
     }
     ////////////////////// staff redirection /////////////////////
     public function user()
     {
         if(session()->has('admin'))
         {
-            $data = DB::table('users')->where('role','teacher')->get();
+            $data = User::where('role','teacher')->get();
             $admin = Auth::user();
             return view('admin.dashboard',['data'=> $data,'admin'=>$admin]);
         }
-        else
-        {
-            return redirect('/');
-        }
+
+        return redirect('/');
     }
+
+    /////////////////////////// Logout ///////////////////////////////////////
     public function logout(Request $request)
     {
         $request->session()->flush();
@@ -65,54 +60,37 @@ class userController extends Controller
     public function changepassword(Request $request)
     {
         if($request['password']==$request['password_c'])
-        {
             $user = User::find(auth()->user()->id)->update(['password'=> Hash::make($request->password)]);
-
             if($user)
-            {
                return redirect('admin/dashboard');
-            }
-        }
-        else
-        {
-            dd('Error change password');
-        }
+        dd('Error change password');
     }
+
+
 
 ////////////////////////////////tecaher password change////////////////////////////////
     public function changepasswordTeacher(Request $request)
     {
         if($request['password']==$request['password_c'])
-        {
             $user = User::find(auth()->user()->id)->update(['password'=> Hash::make($request->password)]);
-
             if($user)
-            {
                return redirect('teacher/dashboard');
-            }
-        }
-        else
-        {
-            dd('Error change password');
-        }
+        dd('Error change password');
     }
+
+
 
 //////////////////// Edit teacher -- admin panel ////////////////////////////
     public function update(Request $request)
     {
-        $request->validate(['name'=>'required', 'email'=>'required|unique:users,email']);
+        $request->validate(['name'=>'required', 'email'=>'required']);
         $update = User::where('id',$request['id'])->update([
             'name'=> $request['name'],
             'email'=> $request['email']
         ]);
         if($update)
-        {
             return redirect('admin/dashboard');
-        }
-        else
-        {
-            return dd('Error while updating');
-        }
+        dd('Error while updating');
 
     }
 
@@ -128,15 +106,14 @@ class userController extends Controller
         $cred['password']= bcrypt('password');
         $add = User::create($cred);
         if($add)
-        {
             return redirect('admin/dashboard');
-        }
-        else
-        {
-            return dd('Error while adding user');
-        }
+        return dd('Error while adding user');
+
 
     }
+
+
+    ///////////////////////////////////   delete teacher ////////////////////////////////
     public function delete(Request $request)
     {
         $del = User::find($request->id)->delete();
@@ -152,7 +129,7 @@ class userController extends Controller
 ///////////// login ///////////////////
 public function apilogin(Request $request)
 {
-     //credentials validation
+    //credentials validation
     $login = $request->validate([
     'email'=>'required',
     'password'=>'required',
@@ -171,16 +148,14 @@ public function apilogin(Request $request)
             'user'=>$user,
             'token'=>$token,
             'teachers'=>$teachers,
-
         ]);
-
        }
        elseif($user['role']=='teacher')
        {
         $data= Auth::user();
-        $total = count(DB::table('students')->get());
-        $tenth = count(DB::table('students')->where('class','10th')->get());
-        $twelve = count(DB::table('students')->where('class','12th')->get());
+        $total = count(student::get());
+        $tenth = count(student::where('class','10th')->get());
+        $twelve = count(student::where('class','12th')->get());
         $token = $user->createToken('authToken')->plainTextToken;
         return response()->json([
             'user'=>$data,
@@ -189,16 +164,11 @@ public function apilogin(Request $request)
             '12th'=>$twelve,
             'token'=> $token
         ]);
-
        }
-
     }
-     else
-    {
-         return response()->json([
-            'message'=>'Invalid Credentials'
-            ]);
-    }
+    return response()->json([
+        'message'=>'Invalid Credentials'
+        ]);
 }
 
 ///////  staff change password////////////
@@ -210,26 +180,18 @@ public function apichange(Request $request)
     ]);
     if($request['password']==$request['password_c'])
     {
-        $user = User::find(auth()->user()->id)->update(['password'=> Hash::make($request->password)]);
-        if($user)
-        {
+        if(User::find(auth()->user()->id)->update(['password'=> Hash::make($request->password)]))
             return response()->json([
                 'message'=> 'Password changed successfully'
             ]);
-        }
-        else
-        {
-            return response()->json([
+        return response()->json([
                 'message'=>'password change Unseccessful'
             ]);
-        }
     }
-
-
 }
 
 
-//////create teacher//////
+    //////create teacher//////
 public function createteacher(Request $request)
 {
     if(Auth::user()->role == 'admin')
@@ -242,36 +204,56 @@ public function createteacher(Request $request)
     $teacher['password']= hash::make('password');
     $created = user::create($teacher);
     if($created)
-    {
         return response()->json([
             'message'=> 'Teacher added successfully',
         ]);
-    }
-    else
-    {
-        return response()->json([
-            'message'=>'Error while adding teacher'
+    return response()->json([
+        'message'=>'Error while adding teacher'
         ]);
     }
-    }
-    else
-    {
-        return response()->json([
+    return response()->json([
             'message'=> 'unauthorized'
         ]);
-    }
 }
 
 ////////////////////  Edit teacher -- admin panel  ///////////////////////////
 public function editteacher(Request $request)
 {
+    if(Auth::user()->role == 'admin')
+    {
     $edit = $request->validate([
         'name'=> 'required',
-        'email'=>'required|unique:users,email'
     ]);
-
+    if(User::where('id',$request['id'])->update([
+        'name'=> $request['name'],
+    ]))
+    return response()->json([
+            'message'=>'Teacher data updated sucessfully'
+        ]);
+    return response()->json([
+                'message'=>'Error while updating teacher'
+        ]);
+    }
+    return response()->json(['message'=>'unauthorized']);
 
 }
+/////////////////////// delete teacher --admin panel ///////////////////////
+public function deleteTeacher(Request $request)
+{
+    if(Auth::user()->role == 'admin')
+    {
+    if(User::find($request->id)->delete())
+        return response()->json([
+            'message'=>'teacher deleted successfully'
+            ]);
+        return response()->json([
+            'message'=>'error while deleting teacher data'
+            ]);
+    }
+    return response()->json(['message'=>'unauthorized']);
+}
+
+
 
 
 

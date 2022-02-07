@@ -16,11 +16,11 @@ class studentFactory extends Factory
     {
         return [
             'rollno'=> '01',
-            'name' => 'Student 1',
-            'father_name'=>'student father',
+            'name' => 'Saddam',
+            'father_name'=>'M H Malik',
             'class'=> '10th',
-            'email' => 'student1@gmail.com',
-            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            'email' => 'saddam@test.com',
+            'password' => md5('password'), // password
 
         ];
     }

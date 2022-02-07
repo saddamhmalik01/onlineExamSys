@@ -16,4 +16,11 @@ class student extends Model
         'father_name',
         'class',
     ];
+    public function attempt(){
+        return $this->hasOne(attempt::class);
+    }
+    public function result()
+    {
+        return $this->hasMany(result::class);
+    }
 }

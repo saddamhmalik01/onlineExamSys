@@ -33,8 +33,8 @@
                     @csrf
                     <label style="margin-left: 0">please select a class:</label>
                     <select required class="form-select" name="class" aria-label="Default select example">
-                        <option value="tenth">10th</option>
-                        <option value="twelve">12th</option>
+                        <option value="10th">10th</option>
+                        <option value="12th">12th</option>
                       </select>
                       <br>
                       <label style="margin-left: 0">Number of Questions:</label>

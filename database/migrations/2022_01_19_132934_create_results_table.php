@@ -15,12 +15,13 @@ class CreateResultsTable extends Migration
     {
         Schema::create('results', function (Blueprint $table) {
             $table->id();
-            $table->string('class');
-            $table->string('rollno');
+            // $table->string('class');
+            // $table->string('rollno');
+            $table->string('student_id');
             $table->string('correct');
             $table->string('wrong');
             $table->string('total');
-            $table->string('dateTime');
+            $table->string('dateTime')->default()->now();
             $table->timestamps();
         });
     }

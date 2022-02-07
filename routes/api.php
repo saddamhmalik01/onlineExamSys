@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 ////public routes///
 
 Route::post('/login',[userController::class,'apilogin'])->name('login');
+Route::post('/studentlogin',[StudentController::class,'apistudentlogin'])->name('studentlogin');
 
 
 
@@ -33,8 +34,12 @@ Route::group(['middleware'=>['auth:sanctum']], function()
     Route::post('/createtest',[examController::class,'createtest']);
     Route::post('/createteacher',[userController::class,'createteacher']);
     Route::post('/editteacher/{id}',[userController::class,'editteacher']);
-
-
-
+    Route::get('/deleteteacher/{id}',[userController::class,'deleteTeacher']);
 
 });
+
+Route::post('/stchangepassword',[StudentController::class,'passwordchange']);
+Route::post('/starttest',[examController::class,'starttest']);
+Route::post('/submittest',[examController::class,'apisubmittest']);
+Route::post('/viewresult',[StudentController::class,'viewresults']);
+

@@ -105,5 +105,5 @@ Route::get('/start_test',[examController::class,'test']);
 Route::post('/submittest',[examController::class,'submittest']);
 Route::get('/logout',[StudentController::class,'logout']);
 Route::get('/changepassword/{id}',[StudentController::class,'enterpassword']);
-Route::post('changepassword/c_password',[studentFactory::class,'updatePwd']);
+Route::post('changepassword/c_password',[StudentController::class,'updatePwd']);
 Route::get('/results',[StudentController::class,'results']);

@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class twelve extends Model
+class attempt extends Model
 {
     use HasFactory;
-    public $tablename='12th';
-    public $fillable = ['Question','a','b','c','d','ans'];
+    public $tablename = 'attempts';
+    public $fillable = [
+        'student_id',
+        'attempts'
+    ];
 
 }

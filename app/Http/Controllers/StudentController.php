@@ -7,9 +7,14 @@ use App\Models\student;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use App\Models\attempt;
+use App\Models\result;
 
 class StudentController extends Controller
 {
+///////////////////////////////////////   WEB ////////////////////////////////////////
+
+    /////////////////// admin view students ////////////////////////
 public function index()
 {
     if(session()->has('admin'))
@@ -20,7 +25,7 @@ public function index()
     return redirect('/');
 }
 
-
+//////////////////// teacher view students ///////////////////
 public function indexteacher()
 {
     if(session()->has('teacher'))
@@ -31,34 +36,36 @@ public function indexteacher()
     return redirect('/');
 }
 
+ ////////////////// add student --teacher panel /////////////////////////
 public function add(Request $request)
 {
 $student = $request->validate([
-    'name'=>'required|string',
-    'father_name'=>'required|string',
-    'class'=> 'required|string',
-    'rollno'=>'required|string',
-    'email'=>'required|unique:students,email',
+        'name'=>'required|string',
+        'father_name'=>'required|string',
+        'class'=> 'required|string',
+        'rollno'=>'required|string',
+        'email'=>'required|unique:students,email',
 
 ]);
 $student['password']= md5('password');
-if(student::create($student))
+$stu = student::create($student);
+if($stu)
 {
-    DB::table('attempts')->insert(['class'=> $student['class'],'attempts'=> '0','rollno'=>$student['rollno']]);
-    if(session('admin')){
-    return redirect('admin/viewstudents');
-    }
+    attempt::create([
+        'student_id'=> $stu['id'],
+        'attempts'=>'0'
+        ]);
+    if(session('admin'))
+        return redirect('admin/viewstudents');
     elseif(session('teacher'))
-    {
         return redirect('teacher/viewstudents');
-    }
 }
-else{
-//validation error
-}
+dd('validation error');
 }
 
 
+
+////////////////////// student login ///////////////////////////////
 public function login(Request $request)
 {
     $request->session()->flush();
@@ -66,10 +73,7 @@ public function login(Request $request)
         'email'=>'required|string',
         'password'=>'required|string'
     ]);
-    $users = DB::table('students')
-                ->where('email', '=', $cred['email'])
-                ->where('password', '=',md5($cred['password']))
-                ->get();
+    $users = student::where('email',$cred['email'])->where('password',md5($cred['password']))->get();
     if(count($users)==1)
     {
         foreach($users as $user)
@@ -77,56 +81,51 @@ public function login(Request $request)
         $request->session()->put('rollno',$user->rollno);
         $request->session()->put('email',$cred['email']);
         $request->session()->put('student','student');
-        $data[] = DB::table('students')->where('email',$cred['email'])->first();
+        $request->session()->put('id',$user->id);
+        $data[] = student::where('email',$cred['email'])->first();
         return redirect('studentdashboard');
     }
-    else
-    {
-        return redirect('studentlogin');
-    }
-
-
+    return redirect('studentlogin');
 }
+
+//////////////////////// view student dashboard //////////////////////////////
 public function studentdash()
 {
          if(session()->has('student')){
-            if(session('class')=='10th'){$class= 'tenth';}
-            if(session('class')=='12th'){$class = 'twelve';}
-            $user =DB::table('students')->where('email',session('email'))->get();
-            $marks = DB::table('results')->orderBy("id",'desc')->where('rollno',session('rollno'))->where('class',$class)->first();
-            $count = count(DB::table('results')->where('class',$class)->where('rollno',session('rollno'))->get());
-            //return $marks;
+            $user = student::where('email',session('email'))->get();
+            $results = student::find(session('id'));
+
+            $marks = $results->result->last();
+            $results = student::find(session('id'));
+            $count = count($results->result);
            return view('studentdashboard',['user'=>$user,'marks'=>$marks, 'count'=>$count]);
          }
          return redirect('studentlogin');
 
 }
+
+//////////////////////// student logout /////////////////////////
 public function logout(Request $request)
 {
     $request->session()->flush();
     return redirect('studentlogin');
 
 }
+
+////////////////////////////// Edit student --admin & teacher panel/////////////////////////
 public function edit(Request $request)
 {   if(session()->has('admin')||session()->has('teacher'))
     {
-    $user = DB::table('students')->where('id',$request->id)->get();
+    $user = student::find($request['id']);
     if(session('admin'))
-        {
         return view('admin/editstudent',['user'=>$user]);
-    }
     elseif(session('teacher'))
-    {
         return view('teacher/editstudent',['user'=>$user]);
     }
-    }
-    else
-    {
-        return redirect('/');
-
-    }
+    return redirect('/');
 }
 
+////////////////// update student data --admin admin and teacher panel /////////////////
 public function update(Request $request)
 {
     $update = DB::table('students')->where('id',$request['id'])->update([
@@ -139,134 +138,185 @@ public function update(Request $request)
     if($update)
     {
         if(session('admin'))
-        {
             return redirect('admin/viewstudents');
-        }
         elseif(session('teacher'))
-        {
             return redirect('teacher/viewstudents');
-        }
     }
 }
 
+
+//////////////// Student password change --student panel ////////////////////
 public function enterpassword(Request $request)
 {
     return view('changepassword',['id'=> $request->id]);
 
 }
+
+
+//////////// view results --student panel /////////////////
 public function results()
 {
     if(session()->has('rollno'))
     {
-    if(session('class')=='10th'){ $class = 'tenth';}
-    if(session('class')=='12th'){ $class = 'twelve';}
-    $result = DB::table('results')->where('rollno',session('rollno'))->where('class',$class)->get();
+    $result = student::find(session('id'))->result;
     return view('results',['result'=>$result]);
     }
-    else
-    {
-        return redirect('studentlogin');
-    }
+    return redirect('studentdashboard');
 }
+
+
+////////////////////// delete student --admin panel //////////////
 public function delete(Request $request)
     {
         $del = student::find($request->id)->delete();
         return redirect('admin/viewstudents');
     }
 
+public function updatePwd(Request $request)
+{
+    $pwd = $request->validate([
+        'password' =>'required',
+        'password_c'=> 'required|same:password',
+    ]);
+    If($pwd)
+    {
+        $update = student::where('id',$request['id'])->update([
+            'password'=> md5($request['password'])
+        ]);
+        return redirect('studentdashboard');
+    }
+    return dd('error');
+}
 
 
 
 
-/////////////////////////////////////////////API//////////////////////////////////////////////
+
+///////////////////////////////////////////// API //////////////////////////////////////////////
 
 
-
+//////////////   view students ///////////////
 public function view()
 {
-    $students = DB::table('students')->get();
+    $students = student::get();
     return response()->json(['students'=> $students]);
 }
 
+
+//////////////////// edit student ////////////////////////
 public function editstudent(Request $request)
 {
-    $update = $request->validate([
+    $request->validate([
         'name'=>'required',
         'father_name'=> 'required',
-        'email'=> 'required',
+        'email'=>'required',
         'rollno'=>'required',
         'class'=>'required',
     ]);
-    if($update)
-    {
-        $updated = DB::table('students')->where('id',$request['id'])->update([
+    if(student::where('id',$request['id'])->update([
             'name'=> $request['name'],
             'father_name'=> $request['father_name'],
             'email'=> $request['email'],
             'rollno'=> $request['rollno'],
             'class'=>$request['class'],
-            'updated_at'=> now()
-        ]);
-        if($updated)
-        {
+            'updated_at'=> now()]))
         return response()->json([
             'message'=> 'Student data updated successfully'
-        ]);
-        }
-        else
-        {
-            return response()->json([
-                'message'=>'Updation unsuccessful'
             ]);
-        }
-
-    }
-    else
-    {
-        return response()->json(['message'=> 'Validtaion Failed']);
-
-    }
+    return response()->json([
+        'message'=>'Updation unsuccessful'
+         ]);
 
 }
 
 
+///////////////////////// add student ////////////////////////////
 public function createstudent(Request $request)
 {
-    $create = $request->validate([
+    if( $student = $request->validate([
         'name'=>'required|string',
         'father_name'=>'required|string',
         'class'=> 'required|string',
         'rollno'=>'required|string',
         'email'=>'required|unique:students,email',
-    ]);
-    if($create)
+    ]))
     {
-        $create['password']= md5('password');
-        if(student::create($create))
+        $student['password']= md5('password');
+        $studentAdd = student::create($student);
+        if($studentAdd)
         {
-            $created = DB::table('attempts')->insert(['class'=> $create['class'],'attempts'=> '0','rollno'=>$create['rollno']]);
+            $created = attempt::create([
+                'student_id'=> $studentAdd->id,
+                'attempts'=>'0',
+            ]);
             if($created)
-            {
                 return response()->json([
                     'message'=>"student created successfully",
-                    'student created'=> $created
-                ]);
-            }
-            else
-            {
+                     ]);
                 return response()->json([
-                        'message'=>'student creation unsuccessful'
-                ]);
-            }
+                   'message'=>'student creation unsuccessful'
+                     ]);
         }
-         else
-        {
-            return response()->json(['message'=>"Validation Failed"]);
-        }
-
+        return response()->json(['message'=>'Error while adding student']);
     }
+    return response()->json(['message'=>'Validation Failed']);
 
+}
+
+
+
+//////////////////////// student login /////////////////////// required = {email, password}
+public function apistudentlogin(Request $request)
+{
+    $cred = $request->validate([
+        'email'=>'required',
+        'password'=>'required'
+    ]);
+    $users = student::where('email', $cred['email'])->where('password',md5($cred['password']))->get();
+    if(count($users)=='1')
+    return response()->json([
+        'message'=>'Login success',
+        'userdata'=>$users
+    ]);
+    return response()->json(['message'=> 'Invalid credentials']);
+}
+
+
+//////////////////// student change password /////////// required = { password,password_c,id }
+public function passwordchange(Request $request)
+{
+    If($pwd = $request->validate([
+        'password' =>'required',
+        'password_c'=> 'required|same:password',
+    ]))
+    {
+        $update = student::where('id',$request['id'])->update([
+            'password'=> md5($request['password'])
+        ]);
+        if($update)
+            return response()->json([
+                'message'=> 'password changed successfully'
+                ]);
+            return response()->json([
+                'message'=>'error while changing password'
+                ]);
+    }
+    return response()->json(['message'=> 'Validation failed']);
 
 }
 
+//////////////// view results --student panel /////////// requires student id/////
+public function viewresults(Request $request)
+{
+    $student = student::find($request['id']);
+    if($student==null)
+    return response()->json(['message'=>'No student found with this id']);
+    $result = $student->result;
+    if(count($result)=='0')
+    return response()->json(['message'=>'No test attempted']);
+    return response()->json(['result'=>$result]);
 }
+
+
+
+} ///////// end of file

@@ -34,20 +34,17 @@
               <span><strong>Edit Student</strong></span><hr>
               <form  method="POST" action="updatestudent">
                   @csrf
-                  @foreach ($user as $item)
-
-                  <input type="hidden" name="id" value={{$item->id}}><br>
+                  <input type="hidden" name="id" value={{$user['id']}}><br>
                   <label>Name: </label><br>
-                  <input type="text" class="form-control" name="name" value={{$item->name}}><br><br>
+                  <input type="text" class="form-control" name="name" value={{$user['name']}}><br><br>
                   <label>Father's Name: </label><br>
-                  <input type="text" class="form-control" name="father_name" value={{$item->father_name}}><br><br>
+                  <input type="text" class="form-control" name="father_name" value={{$user['father_name']}}><br><br>
                   <label>Email: </label><br>
-                  <input type="text" class="form-control" name="email" value={{$item->email}}><br><br>
+                  <input type="text" class="form-control" name="email" value={{$user['email']}}><br><br>
                   <label>Roll No: </label><br>
-                  <input type="text" class="form-control" name="rollno" value={{$item->rollno}}><br><br>
+                  <input type="text" class="form-control" name="rollno" value={{$user['rollno']}}><br><br>
                   <label>Class: </label><br>
-                  <input type="text" class="form-control" name="class" value={{$item->class}}><br><br>
-                  @endforeach
+                  <input type="text" class="form-control" name="class" value={{$user['class']}}><br><br>
                   <button style="margin-left: 205px; width:200px" type="submit" class="btn btn-primary">Update</button>
               </form>
 

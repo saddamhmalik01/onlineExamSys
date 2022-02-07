@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTenthTable extends Migration
+class Create10thTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateTenthTable extends Migration
      */
     public function up()
     {
-        Schema::create('tenth', function (Blueprint $table) {
+        Schema::create('10th', function (Blueprint $table) {
             $table->id();
             $table->string('Question');
             $table->string('a');
@@ -34,6 +34,6 @@ class CreateTenthTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tenth');
+        Schema::dropIfExists('10th');
     }
 }
